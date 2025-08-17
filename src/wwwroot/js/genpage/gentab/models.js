@@ -580,10 +580,6 @@ class ModelBrowserWrapper {
                         return `<b>${escapeHtml(label)}:</b> <span class="model-info-clickable" title="Click to copy" onclick="navigator.clipboard.writeText('${escapedPhrase}').then(() => doNoticePopover('Copied!', 'notice-pop-green')).catch(err => { console.error('Failed to copy: ', err); doNoticePopover('Copy failed!', 'notice-pop-red'); })">${escapeHtml(phraseWithComma)}</span><br>`;
                     }
                 }
-                if (label === 'Usage Hint' && val != null) {
-                    let escapedVal = escapeJsString(val);
-                    return `<b>${escapeHtml(label)}:</b> <span class="model-info-clickable" title="Click to copy" onclick="navigator.clipboard.writeText('${escapedVal}').then(() => doNoticePopover('Copied!', 'notice-pop-green')).catch(err => { console.error('Failed to copy: ', err); doNoticePopover('Copy failed!', 'notice-pop-red'); })">${escapeHtml(val)}</span><br>`;
-                }
                 return `<b>${label}:</b> <span>${val == null ? "(Unset)" : safeHtmlOnly(val)}</span><br>`;
             };
             let getOptLine = (label, val) => val ? getLine(label, val) : '';
