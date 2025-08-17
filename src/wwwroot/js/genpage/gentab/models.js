@@ -12,18 +12,31 @@ let modelIconUrlCache = {};
 let starredModels = null;
 
 document.addEventListener('click', function(event) {
-    if (event.target.classList.contains('model-info-clickable')) {
-        const copyText = event.target.getAttribute('data-copy-text');
-        if (copyText) {
-            navigator.clipboard.writeText(copyText)
-                .then(() => doNoticePopover('Copied!', 'notice-pop-green'))
-                .catch(err => {
-                    console.error('Failed to copy: ', err);
-                    doNoticePopover('Copy failed!', 'notice-pop-red');
-                });
-        }
-    }
+  if (event.target.classList.contains('model-info-clickable')) {
+    handleModelInfoClick(event.target);
+  }
 });
+
+document.addEventListener('keydown', function(event) {
+  if (event.target.classList.contains('model-info-clickable') &&
+      (event.key === 'Enter' || event.key === ' ')) {
+    event.preventDefault();
+    handleModelInfoClick(event.target);
+  }
+});
+
+function handleModelInfoClick(element) {
+  const textToCopy = element.getAttribute('data-copy-text');
+  if (textToCopy) {
+    try {
+      copyText(textToCopy);
+      doNoticePopover('Copied!', 'notice-pop-green');
+    } catch (err) {
+      console.error('Failed to copy: ', err);
+      doNoticePopover('Copy failed!', 'notice-pop-red');
+    }
+  }
+}
 
 function editModelGetHashNow() {
     if (curModelMenuModel == null) {
