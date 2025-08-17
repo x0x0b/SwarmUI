@@ -11,6 +11,20 @@ let nativelySupportedModelExtensions = ["safetensors", "sft", "engine", "gguf"];
 let modelIconUrlCache = {};
 let starredModels = null;
 
+document.addEventListener('click', function(event) {
+    if (event.target.classList.contains('model-info-clickable')) {
+        const copyText = event.target.getAttribute('data-copy-text');
+        if (copyText) {
+            navigator.clipboard.writeText(copyText)
+                .then(() => doNoticePopover('Copied!', 'notice-pop-green'))
+                .catch(err => {
+                    console.error('Failed to copy: ', err);
+                    doNoticePopover('Copy failed!', 'notice-pop-red');
+                });
+        }
+    }
+});
+
 function editModelGetHashNow() {
     if (curModelMenuModel == null) {
         return;
@@ -251,7 +265,7 @@ function save_edit_model() {
     for (let val of ['author', 'type', 'description', 'usage_hint', 'date', 'license', 'trigger_phrase', 'tags', 'prediction_type']) {
         data[val] = getRequiredElementById(`edit_model_${val}`).value;
     }
-    data['is_negative_embedding'] = (model.architecture || '').endsWith('/textual-inversion') ? getRequiredElementById('edit_model_is_negative').checked : false;
+    data['is_negative_embedding'] = (model.architecture || '').endsWith('/textual-inversion') ? getRequiredElement('edit_model_is_negative').checked : false;
     data.subtype = curModelMenuBrowser.subType;
     function complete() {
         genericRequest('EditModelMetadata', data, data => {
@@ -468,9 +482,7 @@ class ModelBrowserWrapper {
     createClickableTriggerPhrase(phrase) {
         const phraseWithComma = phrase.endsWith(',') ? phrase : phrase + ',';
         const escapedPhrase = escapeJsString(phraseWithComma);
-        const onclickHandler = `navigator.clipboard.writeText('${escapedPhrase}').then(() => doNoticePopover('Copied!', 'notice-pop-green')).catch(err => { console.error('Failed to copy: ', err); doNoticePopover('Copy failed!', 'notice-pop-red'); })`;
-
-        return `<span class="model-info-clickable" title="Click to copy" onclick="${onclickHandler}">${escapeHtml(phraseWithComma)}</span>`;
+        return `<span class="model-info-clickable" title="Click to copy" data-copy-text="${escapeHtml(escapedPhrase)}">${escapeHtml(phraseWithComma)}</span>`;
     }
 
     formatTriggerPhrases(val) {
