@@ -565,7 +565,20 @@ class ModelBrowserWrapper {
         if (model.data.is_supported_model_format) {
             let getLine = (label, val) => {
                 if (label === 'Trigger Phrase' && val != null) {
-                    return `<b>${label}:</b> <span class="clickable-copy" onclick="navigator.clipboard.writeText('${escapeHtml(val)}'); showToast('Copied to clipboard!');" style="cursor: pointer; text-decoration: underline;" title="Click to copy">${safeHtmlOnly(val)}</span><br>`;
+                    // ,, で区切られた複数のトリガーフレーズを個別にクリック可能にする
+                    if (val.includes(',,')) {
+                        let phrases = val.split(',,').map(phrase => phrase.trim()).filter(phrase => phrase.length > 0);
+                        let clickableSpans = phrases.map(phrase => {
+                            // 各フレーズの最後にカンマを追加（まだない場合）
+                            let phraseWithComma = phrase.endsWith(',') ? phrase : phrase + ',';
+                            return `<span class="clickable-copy" onclick="navigator.clipboard.writeText('${escapeHtml(phraseWithComma)}'); showToast('Copied to clipboard!');" style="cursor: pointer; text-decoration: underline; margin-right: 8px;" title="Click to copy">${safeHtmlOnly(phraseWithComma)}</span>`;
+                        }).join('');
+                        return `<b>${label}:</b> ${clickableSpans}<br>`;
+                    } else {
+                        // 単一のフレーズの場合も最後にカンマを追加（まだない場合）
+                        let phraseWithComma = val.endsWith(',') ? val : val + ',';
+                        return `<b>${label}:</b> <span class="clickable-copy" onclick="navigator.clipboard.writeText('${escapeHtml(phraseWithComma)}'); showToast('Copied to clipboard!');" style="cursor: pointer; text-decoration: underline;" title="Click to copy">${safeHtmlOnly(phraseWithComma)}</span><br>`;
+                    }
                 }
                 return `<b>${label}:</b> <span>${val == null ? "(Unset)" : safeHtmlOnly(val)}</span><br>`;
             };
