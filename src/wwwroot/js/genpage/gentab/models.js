@@ -482,7 +482,8 @@ class ModelBrowserWrapper {
     createClickableTriggerPhrase(phrase) {
         const phraseWithComma = phrase.endsWith(',') ? phrase : phrase + ',';
         const escapedPhrase = escapeJsString(phraseWithComma);
-        return `<span class="model-info-clickable" title="Click to copy" data-copy-text="${escapeHtml(escapedPhrase)}">${escapeHtml(phraseWithComma)}</span>`;
+        const safePhrase = escapeHtml(phraseWithComma);
+        return `<span class="model-info-clickable" title="Click to copy" data-copy-text="${escapeHtml(escapedPhrase)}">${safePhrase}</span>`;
     }
 
     formatTriggerPhrases(val) {
