@@ -564,7 +564,12 @@ class ModelBrowserWrapper {
         }
         let searchableAdded = '';
         if (model.data.is_supported_model_format) {
-            let getLine = (label, val) => `<b>${label}:</b> <span>${val == null ? "(Unset)" : safeHtmlOnly(val)}</span><br>`;
+            let getLine = (label, val) => {
+                if (label === "Trigger Phrase" && val != null) {
+                    return `<b>${label}:</b> <span>${this.buildCopyableTriggerPhrase(safeHtmlOnly(val))}</span><br>`;
+                }
+                return `<b>${label}:</b> <span>${val == null ? "(Unset)" : safeHtmlOnly(val)}</span><br>`;
+            };
             let getOptLine = (label, val) => val ? getLine(label, val) : '';
             if (this.subType == 'LoRA' || this.subType == 'Stable-Diffusion') {
                 interject += `${getLine("Resolution", `${model.data.standard_width}x${model.data.standard_height}`)}`;
@@ -698,6 +703,32 @@ class ModelBrowserWrapper {
     selectModel(model) {
         this.selectOne(model);
         this.rebuildSelectedClasses();
+    }
+
+    buildCopyableTriggerPhrase(safeTriggerPhrase) {
+        // <div class="safe-html-only">Hotaru Shidare,purple hair,short hair,hairband,black band,blue eyes,huge breasts,, bare shoulders white shirt, black skirt,</div>
+        // 上記を input として ,, で分割 つまり
+        // Hotaru Shidare,purple hair,short hair,hairband,black band,blue eyes,huge breasts,
+        // bare shoulders white shirt, black skirt,
+        // に分けて <div class="safe-html-only"> に囲われた中で、クリックしたときにコピーされるようにしたい
+        let parts = safeTriggerPhrase.split(',,').map(part => part.trim()).filter(part => part.length > 0);
+        if (parts.length == 0) {
+            return `<div class="safe-html-only" onclick="copyToClipboard('')">No trigger phrase</div>`;
+        }
+        let safeParts = parts.map(part => safeHtmlOnly(part));
+        safeTriggerPhrase = `<div class="safe-html-only" onclick="copyToClipboard('${
+            safeParts.join(', ')}')">${safeTriggerPhrase}</div>`;
+        if (safeTriggerPhrase.length > 512) {
+            safeTriggerPhrase = `<div class="safe-html-only" onclick="copyToClipboard('${safeParts.join(', ')}')">Trigger phrase too long to display, click to copy</div>`;
+        }
+        // 512文字を超える場合は、クリックでコピーするようにする
+        if (safeTriggerPhrase.length > 512) {
+            safeTriggerPhrase = `<div class="safe-html-only" onclick="copyToClipboard('${safeParts.join(', ')}')">Trigger phrase too long to display, click to copy</div>`;
+        }
+        else {
+            safeTriggerPhrase = `<div class="safe-html-only">${safeTriggerPhrase}</div>`;
+        }
+        return safeTriggerPhrase
     }
 }
 
