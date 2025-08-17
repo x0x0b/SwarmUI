@@ -1635,19 +1635,20 @@ body {
     display: inline-block;
     padding: 2px 8px;
     margin: 1px 2px;
-    background-color: var(--button-color, #e3f2fd);
-    border: 1px solid var(--border-color, #90caf9);
-    border-radius: 4px;
+    background-color: var(--button-background);
+    color: var(--button-text);
+    border: 1px solid var(--button-border);
+    border-radius: 0.5rem;
     cursor: pointer;
     transition: all 0.2s ease;
     font-size: inherit;
-    color: var(--text-color, #1976d2);
     text-decoration: none;
+    font-weight: bold;
 }
 
 .model-info-clickable:hover {
-    background-color: var(--button-hover-color, #bbdefb);
-    border-color: var(--border-hover-color, #64b5f6);
+    background-color: var(--button-background-hover);
+    color: var(--button-foreground-hover);
     transform: translateY(-1px);
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
