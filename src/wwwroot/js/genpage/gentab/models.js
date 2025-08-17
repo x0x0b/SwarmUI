@@ -565,20 +565,24 @@ class ModelBrowserWrapper {
         if (model.data.is_supported_model_format) {
             let getLine = (label, val) => {
                 if (label === 'Trigger Phrase' && val != null) {
-                    // ,, で区切られた複数のトリガーフレーズを個別にクリック可能にする
                     if (val.includes(',,')) {
                         let phrases = val.split(',,').map(phrase => phrase.trim()).filter(phrase => phrase.length > 0);
-                        let clickableSpans = phrases.map(phrase => {
-                            // 各フレーズの最後にカンマを追加（まだない場合）
+                        let htmlContent = '';
+                        phrases.forEach((phrase, index) => {
                             let phraseWithComma = phrase.endsWith(',') ? phrase : phrase + ',';
-                            return `<span class="clickable-copy" onclick="navigator.clipboard.writeText('${escapeHtml(phraseWithComma)}'); showToast('Copied to clipboard!');" style="cursor: pointer; text-decoration: underline; margin-right: 8px;" title="Click to copy">${safeHtmlOnly(phraseWithComma)}</span>`;
-                        }).join('');
-                        return `<b>${label}:</b> ${clickableSpans}<br>`;
+                            let escapedPhrase = escapeJsString(phraseWithComma);
+                            htmlContent += `<span class="model-info-clickable" title="Click to copy" onclick="navigator.clipboard.writeText('${escapedPhrase}').then(() => doNoticePopover('Copied!', 'notice-pop-green')).catch(err => { console.error('Failed to copy: ', err); doNoticePopover('Copy failed!', 'notice-pop-red'); })">${escapeHtml(phraseWithComma)}</span>`;
+                        });
+                        return `<b>${escapeHtml(label)}:</b> ${htmlContent}<br>`;
                     } else {
-                        // 単一のフレーズの場合も最後にカンマを追加（まだない場合）
                         let phraseWithComma = val.endsWith(',') ? val : val + ',';
-                        return `<b>${label}:</b> <span class="clickable-copy" onclick="navigator.clipboard.writeText('${escapeHtml(phraseWithComma)}'); showToast('Copied to clipboard!');" style="cursor: pointer; text-decoration: underline;" title="Click to copy">${safeHtmlOnly(phraseWithComma)}</span><br>`;
+                        let escapedPhrase = escapeJsString(phraseWithComma);
+                        return `<b>${escapeHtml(label)}:</b> <span class="model-info-clickable" title="Click to copy" onclick="navigator.clipboard.writeText('${escapedPhrase}').then(() => doNoticePopover('Copied!', 'notice-pop-green')).catch(err => { console.error('Failed to copy: ', err); doNoticePopover('Copy failed!', 'notice-pop-red'); })">${escapeHtml(phraseWithComma)}</span><br>`;
                     }
+                }
+                if (label === 'Usage Hint' && val != null) {
+                    let escapedVal = escapeJsString(val);
+                    return `<b>${escapeHtml(label)}:</b> <span class="model-info-clickable" title="Click to copy" onclick="navigator.clipboard.writeText('${escapedVal}').then(() => doNoticePopover('Copied!', 'notice-pop-green')).catch(err => { console.error('Failed to copy: ', err); doNoticePopover('Copy failed!', 'notice-pop-red'); })">${escapeHtml(val)}</span><br>`;
                 }
                 return `<b>${label}:</b> <span>${val == null ? "(Unset)" : safeHtmlOnly(val)}</span><br>`;
             };
