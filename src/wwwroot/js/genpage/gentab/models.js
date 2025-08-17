@@ -465,6 +465,36 @@ class ModelBrowserWrapper {
         this.browser.update();
     }
 
+    createClickableTriggerPhrase(phrase) {
+        const phraseWithComma = phrase.endsWith(',') ? phrase : phrase + ',';
+        const escapedPhrase = escapeJsString(phraseWithComma);
+        const onclickHandler = `navigator.clipboard.writeText('${escapedPhrase}').then(() => doNoticePopover('Copied!', 'notice-pop-green')).catch(err => { console.error('Failed to copy: ', err); doNoticePopover('Copy failed!', 'notice-pop-red'); })`;
+
+        return `<span class="model-info-clickable" title="Click to copy" onclick="${onclickHandler}">${escapeHtml(phraseWithComma)}</span>`;
+    }
+
+    formatTriggerPhrases(val) {
+        if (val.includes(',,')) {
+            const phrases = val.split(',,').map(phrase => phrase.trim()).filter(phrase => phrase.length > 0);
+            return phrases.map(phrase => this.createClickableTriggerPhrase(phrase)).join('');
+        } else {
+            return this.createClickableTriggerPhrase(val);
+        }
+    }
+
+    createInfoLine(label, value, isClickable = false) {
+        if (value == null) {
+            return `<b>${escapeHtml(label)}:</b> <span>(Unset)</span><br>`;
+        }
+
+        if (isClickable && label === 'Trigger Phrase') {
+            const clickableContent = this.formatTriggerPhrases(value);
+            return `<b>${escapeHtml(label)}:</b> ${clickableContent}<br>`;
+        }
+
+        return `<b>${escapeHtml(label)}:</b> <span>${safeHtmlOnly(value)}</span><br>`;
+    }
+
     describeModel(model) {
         let description = '';
         let buttons = [];
@@ -564,23 +594,8 @@ class ModelBrowserWrapper {
         let searchableAdded = '';
         if (model.data.is_supported_model_format) {
             let getLine = (label, val) => {
-                if (label === 'Trigger Phrase' && val != null) {
-                    if (val.includes(',,')) {
-                        let phrases = val.split(',,').map(phrase => phrase.trim()).filter(phrase => phrase.length > 0);
-                        let htmlContent = '';
-                        phrases.forEach((phrase, index) => {
-                            let phraseWithComma = phrase.endsWith(',') ? phrase : phrase + ',';
-                            let escapedPhrase = escapeJsString(phraseWithComma);
-                            htmlContent += `<span class="model-info-clickable" title="Click to copy" onclick="navigator.clipboard.writeText('${escapedPhrase}').then(() => doNoticePopover('Copied!', 'notice-pop-green')).catch(err => { console.error('Failed to copy: ', err); doNoticePopover('Copy failed!', 'notice-pop-red'); })">${escapeHtml(phraseWithComma)}</span>`;
-                        });
-                        return `<b>${escapeHtml(label)}:</b> ${htmlContent}<br>`;
-                    } else {
-                        let phraseWithComma = val.endsWith(',') ? val : val + ',';
-                        let escapedPhrase = escapeJsString(phraseWithComma);
-                        return `<b>${escapeHtml(label)}:</b> <span class="model-info-clickable" title="Click to copy" onclick="navigator.clipboard.writeText('${escapedPhrase}').then(() => doNoticePopover('Copied!', 'notice-pop-green')).catch(err => { console.error('Failed to copy: ', err); doNoticePopover('Copy failed!', 'notice-pop-red'); })">${escapeHtml(phraseWithComma)}</span><br>`;
-                    }
-                }
-                return `<b>${label}:</b> <span>${val == null ? "(Unset)" : safeHtmlOnly(val)}</span><br>`;
+                const isClickable = label === 'Trigger Phrase';
+                return this.createInfoLine(label, val, isClickable);
             };
             let getOptLine = (label, val) => val ? getLine(label, val) : '';
             if (this.subType == 'LoRA' || this.subType == 'Stable-Diffusion') {
