@@ -1644,7 +1644,6 @@ body {
     font-size: inherit;
     text-decoration: none;
     user-select: none;
-    white-space: nowrap;
 }
 
 .model-info-clickable:hover {
